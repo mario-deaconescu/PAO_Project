@@ -1,12 +1,13 @@
 package Cards;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 public class PokerHand extends CardHand implements Comparable<PokerHand> {
-    public static enum Category{
+    public enum Category{
         HIGH_CARD,
         PAIR,
         TWO_PAIR,
@@ -29,7 +30,7 @@ public class PokerHand extends CardHand implements Comparable<PokerHand> {
         // Determine the category of the hand
         // Sort the cards by rank
         List<Card> sorted = new ArrayList<>(cards);
-        sorted.sort((card1, card2) -> card1.getRank().compareTo(card2.getRank()));
+        sorted.sort(Comparator.comparing(Card::getRank));
 
         // Check for a flush
         boolean flush = sorted.stream().allMatch(card -> card.getSuit() == sorted.getFirst().getSuit()) && sorted.size() == 5;

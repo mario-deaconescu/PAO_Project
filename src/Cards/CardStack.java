@@ -5,7 +5,7 @@ import java.util.Stack;
 
 public class CardStack implements CardStorage {
 
-    protected final Stack<Card> cards = new Stack<Card>();
+    protected final Stack<Card> cards = new Stack<>();
 
     public CardStack(Collection<Card> cards) {
         this.cards.addAll(cards);

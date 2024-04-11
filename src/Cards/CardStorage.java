@@ -2,19 +2,19 @@ package Cards;
 
 public interface CardStorage {
 
-    public void push(Card card);
+    void push(Card card);
 
-    public Card pop();
+    Card pop();
 
-    public boolean isEmpty();
+    boolean isEmpty();
 
-    public int size();
+    int size();
 
-    public void clear();
+    void clear();
 
-    public Card peek();
+    Card peek();
 
-    public void moveAll(CardStorage storage);
+    void moveAll(CardStorage storage);
 
-    public String toString();
+    String toString();
 }

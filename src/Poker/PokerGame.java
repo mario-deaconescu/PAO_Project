@@ -3,9 +3,7 @@ package Poker;
 import Cards.CardDeck;
 import Cards.CardHand;
 import Cards.PokerHand;
-import Poker.Players.HumanPokerPlayer;
 import Poker.Players.PokerPlayer;
-import Services.PlayerService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -19,11 +17,11 @@ public final class PokerGame {
     private double bet = 0.0;
     private Map<String, Double> pot = new HashMap<>();
 
-    public void addPlayer(PokerPlayer player){
+    public void addPlayer(PokerPlayer player) {
         players.add(player);
     }
 
-    public void removePlayer(PokerPlayer player){
+    public void removePlayer(PokerPlayer player) {
         players.remove(player);
     }
 
@@ -31,61 +29,59 @@ public final class PokerGame {
         return bet;
     }
 
-    private Map<String, Double> getOtherBets(PokerPlayer player){
+    private Map<String, Double> getOtherBets(PokerPlayer player) {
         return players.stream()
                 .filter(p -> !Objects.equals(p, player) && p.isPlaying())
                 .collect(Collectors.toMap(PokerPlayer::getName, PokerPlayer::getBet));
     }
 
-    private void takePlayerBet(PokerPlayer player){
+    private void takePlayerBet(PokerPlayer player) {
         pot.put(player.getName(), pot.getOrDefault(player.getName(), 0.0) + player.takeBet());
     }
 
-    private double totalPot(){
+    private double totalPot() {
         return pot.values().stream().mapToDouble(Double::doubleValue).sum();
     }
 
-    private void givePot(PokerPlayer player){
+    private void givePot(PokerPlayer player) {
         for (PokerPlayer p : players) {
             takePlayerBet(p);
         }
         player.giveBalance(totalPot());
         bet = 0.0;
-        for(PokerPlayer otherPlayer : players){
+        for (PokerPlayer otherPlayer : players) {
             otherPlayer.fold();
         }
         System.out.println(player.getName() + " wins " + totalPot());
     }
 
-    private boolean checkTable(){
+    private boolean checkTable() {
         // Check if there is only one player left
-        if(players.stream().filter(PokerPlayer::isPlaying).count() == 1){
-            // The last player wins
-            PokerPlayer winner = players.stream().filter(PokerPlayer::isPlaying).findFirst().get();
+        PokerPlayer winner = players.stream().filter(PokerPlayer::isPlaying).findFirst().orElse(null);
+        if (winner != null) {
             givePot(winner);
             return false;
         }
         return true;
     }
 
-    private boolean bettingRound(){
+    private boolean bettingRound() {
         bet = 0.0;
-        boolean raised = false;
         Map<String, Boolean> pending = players.stream().collect(Collectors.toMap(PokerPlayer::getName, PokerPlayer::isPlaying));
         do {
             for (PokerPlayer player : players) {
                 if (!player.isPlaying())
                     continue;
                 player.play(table, totalPot(), getOtherBets(player), bet);
-                if(!player.isPlaying()){
+                if (!player.isPlaying()) {
                     // Player folded
                     takePlayerBet(player);
                 }
-                if(!checkTable()){
+                if (!checkTable()) {
                     return false;
                 }
                 pending.put(player.getName(), false);
-                if(player.getBet() > bet){
+                if (player.getBet() > bet) {
                     bet = player.getBet();
                     // Mark all other players as pending
                     for (PokerPlayer otherPlayer : players) {
@@ -96,24 +92,24 @@ public final class PokerGame {
                 }
                 pending.put(player.getName(), false);
             }
-        }while(pending.containsValue(true));
+        } while (pending.containsValue(true));
         for (PokerPlayer player : players) {
             takePlayerBet(player);
         }
         return true;
     }
 
-    private void showHands(){
+    private void showHands() {
         System.out.println("Table: " + table);
-        for(PokerPlayer player : players){
-            if(player.isPlaying()){
+        for (PokerPlayer player : players) {
+            if (player.isPlaying()) {
                 System.out.println(player.getName() + ": " + player.getHand());
                 System.out.println(player.getName() + " best hand: " + player.calculateBestHand(table));
             }
         }
     }
 
-    private void splitPot(List<PokerPlayer> winners){
+    private void splitPot(List<PokerPlayer> winners) {
         double potContributionOfWinners = winners.stream()
                 .mapToDouble(player -> pot.get(player.getName()))
                 .sum();
@@ -125,12 +121,12 @@ public final class PokerGame {
         }
         bet = 0.0;
         pot = new HashMap<>();
-        for(PokerPlayer player : players){
+        for (PokerPlayer player : players) {
             player.fold();
         }
     }
 
-    private void showdown(){
+    private void showdown() {
         showHands();
         // Sort players by best hand
         Map<PokerPlayer, PokerHand> bestHands = players.stream()
@@ -144,15 +140,15 @@ public final class PokerGame {
         List<PokerPlayer> winnersWithBestHand = winners.stream()
                 .filter(player -> bestHands.get(player).getHandValue() == bestHandValue)
                 .toList();
-        if(winnersWithBestHand.size() == 1){
+        if (winnersWithBestHand.size() == 1) {
             givePot(winnersWithBestHand.getFirst());
         } else {
             splitPot(winnersWithBestHand);
         }
     }
 
-    public void play(){
-        if(players.size() < 2){
+    public void play() {
+        if (players.size() < 2) {
             throw new IllegalStateException("Not enough players");
         }
         // Prepare the deck
@@ -163,32 +159,32 @@ public final class PokerGame {
             players.get(i).startPlaying();
         }
         // First round of betting
-        if(!bettingRound()){
+        if (!bettingRound()) {
             return;
         }
         // Deal the flop
         table.moveAll(deck.dealStack(3));
         // Second round of betting
-        if(!bettingRound()){
+        if (!bettingRound()) {
             return;
         }
         // Deal the turn
         table.push(deck.pop());
         // Third round of betting
-        if(!bettingRound()){
+        if (!bettingRound()) {
             return;
         }
         // Deal the river
         table.push(deck.pop());
         // Fourth round of betting
-        if(!bettingRound()){
+        if (!bettingRound()) {
             return;
         }
         // Showdown
         showdown();
     }
 
-    public void buyIn(String name, double balance){
+    public void buyIn(String name, double balance) {
         PokerPlayer player = players.stream()
                 .filter(p -> p.getName().equals(name))
                 .findFirst()

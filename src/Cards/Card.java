@@ -2,14 +2,14 @@ package Cards;
 
 public final class Card implements Comparable<Card> {
 
-    public static enum Suit {
+    public enum Suit {
         HEARTS,
         DIAMONDS,
         CLUBS,
         SPADES
     }
 
-    public static enum Rank {
+    public enum Rank {
         ACE('A', 14),
         KING('K', 13),
         QUEEN('Q', 12),

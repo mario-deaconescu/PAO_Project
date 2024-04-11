@@ -8,7 +8,7 @@ public abstract class PokerPlayer implements Comparable<PokerPlayer>{
 
     private final String name;
     protected PokerHand hand = new PokerHand();
-    protected double balance = 0.0;
+    protected double balance;
     protected double bet = 0.0;
     protected boolean playing = true;
 

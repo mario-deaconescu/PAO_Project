@@ -1,11 +1,12 @@
 package Cards;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class CardHand implements CardStorage{
 
-    protected final List<Card> cards = new ArrayList<Card>();
+    protected final List<Card> cards = new ArrayList<>();
 
     public CardHand() {
     }
@@ -68,7 +69,7 @@ public class CardHand implements CardStorage{
         if(cards.isEmpty()){
             throw new IllegalStateException("Hand is empty");
         }
-        return cards.stream().max((card1, card2) -> card1.getRank().compareTo(card2.getRank())).get();
+        return cards.stream().max(Comparator.comparing(Card::getRank)).get();
     }
 
     public CardHand copyHand(){
